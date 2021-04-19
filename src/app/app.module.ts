@@ -10,6 +10,8 @@ import { HttpClientModule } from '@angular/common/http'
 import { StoreModule } from '@ngrx/store';
 import { reducer } from './reducers';
 import { NgxLoadingModule } from 'ngx-loading';
+import { EffectsModule } from '@ngrx/effects';
+import { BookEffect } from './effects/book.effect';
 
 @NgModule({
   declarations: [
@@ -24,6 +26,9 @@ import { NgxLoadingModule } from 'ngx-loading';
     ReactiveFormsModule,
     HttpClientModule,
     StoreModule.forRoot(reducer),
+    EffectsModule.forRoot([
+      BookEffect
+    ]),
     NgxLoadingModule.forRoot({})
   ],
   providers: [],

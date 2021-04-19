@@ -34,6 +34,10 @@ export function reducer(state = initialState ,action: AddBookActions) {
                 hasError: true,
                 data: action.payload
             }
+        case act.ADD_BOOK_CLEAR:
+            return {
+                ...initialState
+            }
         default:
             return state
     }
