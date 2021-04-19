@@ -28,9 +28,11 @@ export class BooksListComponent implements OnInit ,OnDestroy {
   }
 
   deleteBook(id ,i) {
-    this.deleteBookSub = this.crudService.deleteBook(id).subscribe(res => {
-      this.books.splice(i)
-    } ,err => console.log(err))
+    if(confirm(`Do you want to delete id ${id} from book store?`)) {
+      this.deleteBookSub = this.crudService.deleteBook(id).subscribe(res => {
+        this.books.splice(i)
+      } ,err => console.log(err))
+    }
   }
 
   editBook(id) {

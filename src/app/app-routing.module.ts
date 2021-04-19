@@ -2,13 +2,12 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { BooksListComponent } from './components/books-list/books-list.component';
 import { AddBookComponent } from './components/add-book/add-book.component';
-import { BookDetailComponent } from './components/book-detail/book-detail.component';
 
 
 const routes: Routes = [
-  {path: '' ,pathMatch: 'full' ,redirectTo: 'add-book'},
+  {path: '' ,pathMatch: 'full' ,redirectTo: 'books-list'},
   {path: 'add-book' ,component: AddBookComponent},
-  {path: 'book-detail/:id'  ,component: BookDetailComponent},
+  {path: 'book-detail/:id'  ,component: AddBookComponent},
   {path: 'books-list'  ,component: BooksListComponent},
 ];
 

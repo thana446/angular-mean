@@ -39,7 +39,7 @@ router.route('/read-book/:id').get((req ,res ,next) => {
 })
 
 //update book
-router.route('/update-book').put((req ,res ,next) => {
+router.route('/update-book/:id').put((req ,res ,next) => {
     const {body ,params} = req
     const {id} = params
     Book.findByIdAndUpdate(id, body,(err ,data) => {
