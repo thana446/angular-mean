@@ -1,4 +1,4 @@
-import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { select, Store } from '@ngrx/store';
@@ -9,6 +9,7 @@ import { CrudService } from 'src/app/service/crud.service';
 import * as fromReducer from '../../reducers';
 import * as addBookAct from '../../actions/add-book.action';
 import * as updateBookAct from '../../actions/update-book.action';
+import * as getBookAct from '../../actions/get-book.action';
 import { LoadingService } from 'src/app/service/loading-service.service';
 import { skip } from 'rxjs/operators';
 
@@ -17,7 +18,7 @@ import { skip } from 'rxjs/operators';
   templateUrl: './add-book.component.html',
   styleUrls: ['./add-book.component.scss']
 })
-export class AddBookComponent implements OnInit ,OnDestroy{
+export class AddBookComponent implements OnInit ,OnDestroy {
 
   bookForm: FormGroup
   isEdit: boolean
@@ -27,6 +28,8 @@ export class AddBookComponent implements OnInit ,OnDestroy{
   addBookSub: Subscription
   updateBook$: Observable<IResponse>
   updateBookSub: Subscription
+  getBook$: Observable<IResponse>
+  getBookSub: Subscription
 
   constructor(
     private fb: FormBuilder,
@@ -39,6 +42,7 @@ export class AddBookComponent implements OnInit ,OnDestroy{
     ) {
       this.addBook$ = this.store.pipe(select('addBook'))
       this.updateBook$ = this.store.pipe(select('updateBook'))
+      this.getBook$ = this.store.pipe(select('getBook'))
       this.bookForm = fb.group({
         name: [''],
         price: [''],
@@ -55,27 +59,37 @@ export class AddBookComponent implements OnInit ,OnDestroy{
     this.updateBookSub = this.updateBook$.pipe(skip(1)).subscribe(res => this.handleSubmitResponse(res ,'Update Book Success'))
   }
 
-
   getBookDetail(id) {
-    this.crudService.getBook(id).subscribe((book: IBook) => {
-      const {name ,price ,description} = book
-      this.bookForm.setValue({name ,price ,description})
-    } ,err => console.log(err))
+    this.store.dispatch(new getBookAct.GetBook(id))
+    this.loadingService.startLoading()
+    this.getBookSub = this.getBook$.subscribe(res => {
+      const {isLoading ,hasData ,hasError ,data} = res
+      if(!isLoading) {
+        this.loadingService.stopLoading()
+        if(hasData) {
+          const {name ,price ,description} = data
+          this.bookForm.setValue({name ,price ,description})
+        }
+        if(hasError) {
+          alert(data)
+        }
+      }
+    })
   }
 
   onSubmit(values) {
+    this.loadingService.startLoading()
     if(this.isEdit) {
       const book: IBook = {_id: this.id ,...values}
       this.store.dispatch(new updateBookAct.UpdateBook(book))
     }else {
       this.store.dispatch(new addBookAct.AddBook(values))
-      this.loadingService.startLoading()
     }
 
   }
 
   handleSubmitResponse(res: IResponse ,msgLog) {
-    const {isLoading ,hasData ,hasError} = res
+    const {isLoading ,hasData ,hasError ,data} = res
     if(!isLoading) {
       this.loadingService.stopLoading();
       if(hasData) {
@@ -84,7 +98,7 @@ export class AddBookComponent implements OnInit ,OnDestroy{
         this.zone.run(() => this.router.navigateByUrl('/books-list'))
       }
       if(hasError) {
-        alert(res)
+        alert(data)
         this.store.dispatch(new addBookAct.AddBookClear())
       }
     }

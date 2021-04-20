@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { Observable, Subscription } from 'rxjs';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
 import {LoadingService} from './service/loading-service.service'
 
 @Component({
@@ -7,16 +7,17 @@ import {LoadingService} from './service/loading-service.service'
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent implements OnInit{
+export class AppComponent implements OnInit {
   loadingSub: Subscription
   isLoading: boolean = false
 
-  constructor(private loadingService: LoadingService) {
+  constructor(private loadingService: LoadingService ,private ref: ChangeDetectorRef) {
   }
 
   ngOnInit() {
     this.loadingSub = this.loadingService.getLoading().subscribe(loading => {
       this.isLoading = loading
+      this.ref.detectChanges()
     })
   }
 }
