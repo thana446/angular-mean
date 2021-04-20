@@ -8,6 +8,7 @@ import { IResponse } from 'src/app/Interface/response.interface';
 import { CrudService } from 'src/app/service/crud.service';
 import * as fromReducer from '../../reducers';
 import * as addBookAct from '../../actions/add-book.action';
+import * as updateBookAct from '../../actions/update-book.action';
 import { LoadingService } from 'src/app/service/loading-service.service';
 import { skip } from 'rxjs/operators';
 
@@ -24,6 +25,8 @@ export class AddBookComponent implements OnInit ,OnDestroy{
 
   addBook$: Observable<IResponse>
   addBookSub: Subscription
+  updateBook$: Observable<IResponse>
+  updateBookSub: Subscription
 
   constructor(
     private fb: FormBuilder,
@@ -35,6 +38,7 @@ export class AddBookComponent implements OnInit ,OnDestroy{
     private loadingService: LoadingService
     ) {
       this.addBook$ = this.store.pipe(select('addBook'))
+      this.updateBook$ = this.store.pipe(select('updateBook'))
       this.bookForm = fb.group({
         name: [''],
         price: [''],
@@ -47,7 +51,8 @@ export class AddBookComponent implements OnInit ,OnDestroy{
     this.isEdit = this.id ? true : false
     if(this.isEdit) this.getBookDetail(this.id)
 
-    this.addBookSub = this.addBook$.subscribe(res => this.handleSubmitResponse(res ,'Add Book Success'))
+    this.addBookSub = this.addBook$.pipe(skip(1)).subscribe(res => this.handleSubmitResponse(res ,'Add Book Success'))
+    this.updateBookSub = this.updateBook$.pipe(skip(1)).subscribe(res => this.handleSubmitResponse(res ,'Update Book Success'))
   }
 
 
@@ -61,7 +66,7 @@ export class AddBookComponent implements OnInit ,OnDestroy{
   onSubmit(values) {
     if(this.isEdit) {
       const book: IBook = {_id: this.id ,...values}
-      // this.crudService.updateBook(book).subscribe(res => this.handleSubmitResponse('Update Book Success') ,err => console.log(err))
+      this.store.dispatch(new updateBookAct.UpdateBook(book))
     }else {
       this.store.dispatch(new addBookAct.AddBook(values))
       this.loadingService.startLoading()
@@ -87,6 +92,8 @@ export class AddBookComponent implements OnInit ,OnDestroy{
 
   ngOnDestroy() {
     this.addBookSub && this.addBookSub.unsubscribe()
+    this.updateBookSub && this.updateBookSub.unsubscribe()
+
   }
 }
 
